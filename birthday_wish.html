@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>包谷生日快乐</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffb6c1 0%, #ffe4e1 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 背景装饰 */
+        .bg-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .balloon {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background-color: rgba(255, 99, 71, 0.8);
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.7;
+            transform-origin: bottom center;
+        }
+        
+        .balloon::before {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            width: 4px;
+            height: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            transform: translateX(-50%);
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(5deg);
+            }
+            50% {
+                transform: translateY(-50px) rotate(-5deg);
+            }
+        }
+        
+        /* 弹窗样式 */
+        .popup {
+            position: absolute;
+            padding: 15px 20px;
+            border-radius: 25px;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+            z-index: 100;
+            font-weight: bold;
+            color: #e74c3c;
+            max-width: 200px;
+            text-align: center;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        /* 弹窗入场动画 */
+        @keyframes popupEnter {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-10deg);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        
+        /* 弹窗退场动画 */
+        @keyframes popupExit {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            60% {
+                opacity: 0.8;
+                transform: scale(1.1) translateY(-10px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8) translateY(-30px);
+            }
+        }
+        
+        /* 弹窗悬浮动画 */
+        @keyframes floatLight {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-5px) rotate(1deg);
+            }
+        }
+        
+        /* 信封样式 */
+        .envelope {
+            position: absolute;
+            width: 280px;
+            height: 180px;
+            background-color: #f4d03f;
+            border-radius: 5px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 200;
+            opacity: 0;
+            transform: scale(0);
+            animation: envelopeAppear 0.8s ease-out 9s forwards;
+        }
+        
+        @keyframes envelopeAppear {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .envelope:hover {
+            transform: scale(1.05);
+        }
+        
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f1c40f;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transition: transform 0.5s ease;
+            transform-origin: top;
+        }
+        
+        .envelope.opened .envelope-flap {
+            transform: rotateX(180deg);
+        }
+        
+        .envelope-front {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: #f4d03f;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        /* 信件样式 */
+        .letter {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 70%;
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            overflow-y: auto;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            transform: translateX(-50%) translateY(10px);
+            opacity: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .envelope.opened .letter {
+            transform: translateX(-50%) translateY(-60px);
+            opacity: 1;
+        }
+        
+        /* 信封上的文字 */
+        .envelope-text {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #7d8c4b;
+            font-weight: bold;
+            font-size: 18px;
+            transition: opacity 0.3s ease;
+        }
+        
+        .envelope.opened .envelope-text {
+            opacity: 0;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .envelope {
+                width: 220px;
+                height: 150px;
+            }
+            
+            .letter {
+                font-size: 12px;
+                padding: 15px;
+            }
+            
+            .envelope-text {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration" id="bgDecoration"></div>
+    
+    <!-- 弹窗容器 -->
+    <div id="popupContainer"></div>
+    
+    <!-- 信封元素 -->
+    <div class="envelope" id="envelope">
+        <div class="envelope-flap"></div>
+        <div class="envelope-front"></div>
+        <div class="envelope-text">点击打开</div>
+        <div class="letter" id="letter">
+            <p>hello亲爱的 包谷：</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;转眼我们认识已经一年了，却已经陪你过了两个生日，想想也挺奇妙的。从一开始的点头之交，到现在能毫无顾忌地一起聊时代峰峻、一起在金铲铲里斗智斗勇、一起追那些让我们上头的剧——跟你在一起的每一天都很开心，“最喜欢和你一起玩儿啦”🎂</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;你真的是我见过最幽默的美人（虽然内心也住着一个小女孩），永远能把气氛带起来很欢乐。跟你在一起，我可以毫无收敛地疯癫，你总能秒懂我的梗，更难得的是，你总是记得我随口说过的每一句话，这种小细腻的包谷，让我觉得很温暖。</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;我知道，你在感情里遇到过不少坏男人，但你依旧保持着强大和乐观。你说过自己是个会向前看的乐观人，这一点我特别佩服。</p>
+            <p>&nbsp;&nbsp;&nbsp;&nbsp;20岁是个全新的开始，希望未来的你，能遇到真正懂得珍惜你的人，也希望你一直保持这份笑容和热爱。</p>
+            <p style="text-align: right; margin-top: 20px;">仅你们口中的欠欠儿</p>
+        </div>
+    </div>
+    
+    <script>
+        // 等待DOM加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            // 生成背景气球装饰
+            createBackgroundDecorations();
+            
+            // 生日祝福语数组
+            const wishes = [
+                '包谷生日快乐！🎂',
+                '祝你生日快乐，天天开心！',
+                '生日快乐，愿你梦想成真！',
+                '包谷，生日快乐！🎉',
+                '生日快乐，健康成长！',
+                '祝你生日快乐，永远年轻！',
+                '包谷，生日快乐，幸福满满！',
+                '生日快乐，前程似锦！',
+                '包谷，生日快乐！🎁',
+                '祝你生日快乐，万事如意！',
+                '生日快乐，开心每一天！',
+                '包谷，生日快乐，岁岁平安！',
+                '生日快乐，梦想成真！',
+                '包谷，生日快乐！❤️',
+                '祝你生日快乐，好运连连！'
+            ];
+            
+            const popupContainer = document.getElementById('popupContainer');
+            let popupInterval;
+            let popupCount = 0;
+            const maxPopups = 30; // 最大弹窗数量
+            
+            // 创建随机位置的弹窗
+            function createPopup() {
+                if (popupCount >= maxPopups) return;
+                
+                // 创建弹窗元素
+                const popup = document.createElement('div');
+                popup.className = 'popup';
+                
+                // 随机选择祝福语
+                const randomWish = wishes[Math.floor(Math.random() * wishes.length)];
+                popup.textContent = randomWish;
+                
+                // 随机位置
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                const popupWidth = 200; // 预估弹窗宽度
+                const popupHeight = 60; // 预估弹窗高度
+                
+                const x = Math.random() * (windowWidth - popupWidth);
+                const y = Math.random() * (windowHeight - popupHeight);
+                
+                popup.style.left = x + 'px';
+                popup.style.top = y + 'px';
+                
+                // 随机颜色（在主题色范围内）
+                const colors = ['#e74c3c', '#e67e22', '#f39c12', '#27ae60', '#3498db', '#9b59b6'];
+                popup.style.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 添加到容器
+                popupContainer.appendChild(popup);
+                popupCount++;
+                
+                // 应用入场动画
+                popup.style.animation = 'popupEnter 0.6s ease-out forwards';
+                
+                // 入场后应用悬浮动画
+                setTimeout(() => {
+                    popup.style.animation = 'floatLight 3s ease-in-out infinite';
+                }, 600);
+                
+                // 2.5秒后应用退场动画
+                setTimeout(() => {
+                    popup.style.animation = 'popupExit 0.6s ease-in forwards';
+                    
+                    // 退场动画完成后移除元素
+                    setTimeout(() => {
+                        if (popup.parentNode === popupContainer) {
+                            popupContainer.removeChild(popup);
+                            popupCount--;
+                        }
+                    }, 600);
+                }, 2500);
+            }
+            
+            // 开始创建弹窗
+            popupInterval = setInterval(createPopup, 300); // 每300毫秒创建一个弹窗
+            
+            // 9秒后停止创建弹窗
+            setTimeout(() => {
+                clearInterval(popupInterval);
+                
+                // 移除所有剩余的弹窗
+                setTimeout(() => {
+                    while (popupContainer.firstChild) {
+                        popupContainer.removeChild(popupContainer.firstChild);
+                    }
+                    popupCount = 0;
+                }, 2000);
+            }, 9000);
+            
+            // 信封交互功能
+            const envelope = document.getElementById('envelope');
+            envelope.addEventListener('click', function() {
+                this.classList.toggle('opened');
+            });
+        });
+        
+        // 创建背景装饰气球
+        function createBackgroundDecorations() {
+            const container = document.getElementById('bgDecoration');
+            const colors = ['rgba(255, 99, 71, 0.6)', 'rgba(255, 165, 0, 0.6)', 'rgba(255, 215, 0, 0.6)', 
+                           'rgba(144, 238, 144, 0.6)', 'rgba(135, 206, 250, 0.6)', 'rgba(218, 112, 214, 0.6)'];
+            
+            for (let i = 0; i < 15; i++) {
+                const balloon = document.createElement('div');
+                balloon.className = 'balloon';
+                
+                // 随机样式
+                balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                balloon.style.width = Math.floor(Math.random() * 30 + 30) + 'px';
+                balloon.style.height = Math.floor(Math.random() * 40 + 40) + 'px';
+                balloon.style.left = Math.random() * 100 + 'vw';
+                balloon.style.bottom = -100 + 'px';
+                balloon.style.animationDuration = Math.floor(Math.random() * 10 + 15) + 's';
+                balloon.style.animationDelay = Math.random() * 5 + 's';
+                balloon.style.animationDirection = Math.random() > 0.5 ? 'normal' : 'reverse';
+                
+                container.appendChild(balloon);
+            }
+        }
+    </script>
+</body>
+</html>
